@@ -1,14 +1,14 @@
 /*
  * @Author: lvxr
  * @Date: 2024-03-22 18:54:28
- * @LastEditTime: 2024-03-22 23:38:29
+ * @LastEditTime: 2024-03-23 20:35:04
  */
-#ifndef MDS_SINGLETON_H
-#define MDS_SINGLETON_H
+#ifndef SYLAR_SINGLETON_H
+#define SYLAR_SINGLETON_H
 
 #include <memory>
 
-namespace mds {
+namespace sylar {
 
 /**
  * @description: 单例模式封装类
@@ -40,6 +40,6 @@ public:
     }
 };
 
-}  // namespace mds
+}  // namespace sylar
 
 #endif

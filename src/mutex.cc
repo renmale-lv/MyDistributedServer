@@ -1,14 +1,14 @@
 /*
  * @Author: lvxr
  * @Date: 2024-03-22 19:49:56
- * @LastEditTime: 2024-03-22 20:55:05
+ * @LastEditTime: 2024-03-23 21:16:19
  */
 
 // 最好不要在头文件中throw异常
 
 #include "mutex.h"
 
-namespace mds {
+namespace sylar {
 Semaphore::Semaphore(uint32_t count) {
     if (sem_init(&m_semaphore, 0, count)) {
         throw std::logic_error("sem_init error");
@@ -28,4 +28,4 @@ void Semaphore::notify() {
         throw std::logic_error("sem_post error");
     }
 }
-}  // namespace mds
+}  // namespace sylar

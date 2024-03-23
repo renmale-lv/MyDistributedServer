@@ -1,10 +1,10 @@
 /*
  * @Author: lvxr
  * @Date: 2024-03-22 18:48:26
- * @LastEditTime: 2024-03-23 14:56:05
+ * @LastEditTime: 2024-03-23 21:06:24
  */
-#ifndef MDS_LOG_H
-#define MDS_LOG_H
+#ifndef SYLAR_LOG_H
+#define SYLAR_LOG_H
 
 #include <stdarg.h>
 #include <stdint.h>
@@ -19,9 +19,17 @@
 
 #include "mutex.h"
 #include "singleton.h"
+/**
+ * 流程：
+ * 1.初始化LogFormatter，LogAppender, Logger
+ * 2.通过宏定义提供流式风格和格式化风格的日志接口。每次写日志时，通过宏自动生成对应的日志事件LogEvent，并且将日志事件和日志器Logger包装到一起，生成一个LogEventWrap对象
+ * 3.日志接口执行结束后，LogEventWrap对象析构，在析构函数里调用Logger的log方法将日志事件进行输出
+ */
 
 /**
  * @brief 使用流式方式将日志级别level的日志写入到logger
+ * @details 返回一个输入流
+ * @todo 启动依赖耗时未实现
  */
 #define SYLAR_LOG_LEVEL(logger, level)                                  \
     if (logger->getLevel() <= level)                                    \
@@ -32,29 +40,49 @@
         .getSS()
 
 /**
+ * @brief 测试用
+ */
+#define SYLAR_LOG_LEVEL_TEST(logger, level)                                    \
+    if (logger->getLevel() <= level)                                           \
+    sylar::LogEventWrap(                                                       \
+        sylar::LogEvent::ptr(new sylar::LogEvent(                              \
+            logger, level, __FILE__, __LINE__, 0, 0, 0, time(0), "log_test"))) \
+        .getSS()
+
+/**
  * @brief 使用流式方式将日志级别debug的日志写入到logger
  */
 #define SYLAR_LOG_DEBUG(logger) SYLAR_LOG_LEVEL(logger, sylar::LogLevel::DEBUG)
+#define SYLAR_LOG_DEBUG_TEST(logger) \
+    SYLAR_LOG_LEVEL_TEST(logger, sylar::LogLevel::DEBUG)
 
 /**
  * @brief 使用流式方式将日志级别info的日志写入到logger
  */
 #define SYLAR_LOG_INFO(logger) SYLAR_LOG_LEVEL(logger, sylar::LogLevel::INFO)
+#define SYLAR_LOG_INFO_TEST(logger) \
+    SYLAR_LOG_LEVEL_TEST(logger, sylar::LogLevel::INFO)
 
 /**
  * @brief 使用流式方式将日志级别warn的日志写入到logger
  */
 #define SYLAR_LOG_WARN(logger) SYLAR_LOG_LEVEL(logger, sylar::LogLevel::WARN)
+#define SYLAR_LOG_WARN_TEST(logger) \
+    SYLAR_LOG_LEVEL_TEST(logger, sylar::LogLevel::WARN)
 
 /**
  * @brief 使用流式方式将日志级别error的日志写入到logger
  */
 #define SYLAR_LOG_ERROR(logger) SYLAR_LOG_LEVEL(logger, sylar::LogLevel::ERROR)
+#define SYLAR_LOG_ERROR_TEST(logger) \
+    SYLAR_LOG_LEVEL_TEST(logger, sylar::LogLevel::ERROR)
 
 /**
  * @brief 使用流式方式将日志级别fatal的日志写入到logger
  */
 #define SYLAR_LOG_FATAL(logger) SYLAR_LOG_LEVEL(logger, sylar::LogLevel::FATAL)
+#define SYLAR_LOG_FATAL_TEST(logger) \
+    SYLAR_LOG_LEVEL_TEST(logger, sylar::LogLevel::FATAL)
 
 /**
  * @brief 使用格式化方式将日志级别level的日志写入到logger
@@ -69,34 +97,55 @@
         ->format(fmt, __VA_ARGS__)
 
 /**
+ * @brief 测试用
+ */
+#define SYLAR_LOG_FMT_LEVEL_TEST(logger, level, fmt, ...)                      \
+    if (logger->getLevel() <= level)                                           \
+    sylar::LogEventWrap(                                                       \
+        sylar::LogEvent::ptr(new sylar::LogEvent(                              \
+            logger, level, __FILE__, __LINE__, 0, 0, 0, time(0), "log_test"))) \
+        .getEvent()                                                            \
+        ->format(fmt, __VA_ARGS__)
+
+/**
  * @brief 使用格式化方式将日志级别debug的日志写入到logger
  */
 #define SYLAR_LOG_FMT_DEBUG(logger, fmt, ...) \
     SYLAR_LOG_FMT_LEVEL(logger, sylar::LogLevel::DEBUG, fmt, __VA_ARGS__)
+#define SYLAR_LOG_FMT_DEBUG_TEST(logger, fmt, ...) \
+    SYLAR_LOG_FMT_LEVEL_TEST(logger, sylar::LogLevel::DEBUG, fmt, __VA_ARGS__)
 
 /**
  * @brief 使用格式化方式将日志级别info的日志写入到logger
  */
 #define SYLAR_LOG_FMT_INFO(logger, fmt, ...) \
     SYLAR_LOG_FMT_LEVEL(logger, sylar::LogLevel::INFO, fmt, __VA_ARGS__)
+#define SYLAR_LOG_FMT_INFO_TEST(logger, fmt, ...) \
+    SYLAR_LOG_FMT_LEVEL_TEST(logger, sylar::LogLevel::INFO, fmt, __VA_ARGS__)
 
 /**
  * @brief 使用格式化方式将日志级别warn的日志写入到logger
  */
 #define SYLAR_LOG_FMT_WARN(logger, fmt, ...) \
     SYLAR_LOG_FMT_LEVEL(logger, sylar::LogLevel::WARN, fmt, __VA_ARGS__)
+#define SYLAR_LOG_FMT_WARN_TEST(logger, fmt, ...) \
+    SYLAR_LOG_FMT_LEVEL_TEST(logger, sylar::LogLevel::WARN, fmt, __VA_ARGS__)
 
 /**
  * @brief 使用格式化方式将日志级别error的日志写入到logger
  */
 #define SYLAR_LOG_FMT_ERROR(logger, fmt, ...) \
     SYLAR_LOG_FMT_LEVEL(logger, sylar::LogLevel::ERROR, fmt, __VA_ARGS__)
+#define SYLAR_LOG_FMT_ERROR_TEST(logger, fmt, ...) \
+    SYLAR_LOG_FMT_LEVEL_TEST(logger, sylar::LogLevel::ERROR, fmt, __VA_ARGS__)
 
 /**
  * @brief 使用格式化方式将日志级别fatal的日志写入到logger
  */
 #define SYLAR_LOG_FMT_FATAL(logger, fmt, ...) \
     SYLAR_LOG_FMT_LEVEL(logger, sylar::LogLevel::FATAL, fmt, __VA_ARGS__)
+#define SYLAR_LOG_FMT_FATAL_TEST(logger, fmt, ...) \
+    SYLAR_LOG_FMT_LEVEL_TEST(logger, sylar::LogLevel::FATAL, fmt, __VA_ARGS__)
 
 /**
  * @brief 获取主日志器
@@ -108,7 +157,7 @@
  */
 #define SYLAR_LOG_NAME(name) sylar::LoggerMgr::GetInstance()->getLogger(name)
 
-namespace mds {
+namespace sylar {
 class Logger;
 class LoggerManager;
 
@@ -119,11 +168,17 @@ class LogLevel {
 public:
     // 日志级别
     enum Level {
+        // 未设置
         UNKNOW = 0,
+        // 调试信息
         DEBUG = 1,
+        // 一般信息
         INFO = 2,
+        // 警告
         WARN = 3,
+        // 错误
         ERROR = 4,
+        // 致命情况
         FATAL = 5
     };
 
@@ -135,7 +190,8 @@ public:
 };
 
 /**
- * @brief: 日志事件
+ * @brief 日志事件类，用于记录日志现场
+ * @details 一行日志对应一个日志事件
  */
 class LogEvent {
 public:
@@ -248,6 +304,8 @@ private:
 
 /**
  * @brief 日志事件包装器
+ * @details
+ * 在构建时指定日志事件，日志事件内包含日志器，在析构时会调用日志器输出日志信息
  */
 class LogEventWrap {
 public:
@@ -321,6 +379,7 @@ public:
 public:
     /**
      * @brief 日志内容项格式化
+     * @details 通过继承该类实现某一个格式的格式化
      */
     class FormatItem {
     public:
@@ -367,7 +426,10 @@ private:
 };
 
 /**
- * @brief 日志输出目标
+ * @brief 日志输出器
+ * @details
+ * 内部包含一个LogFormatter成员和一个log方法，日志事件先经过LogFormatter格式化后再输出到对应的输出地
+ * 派生出不同的Appender类型，比如StdoutLogAppender和FileLogAppender，分别表示输出到终端和文件
  */
 class LogAppender {
     friend class Logger;
@@ -428,7 +490,10 @@ protected:
 };
 
 /**
- * @brief 日志器
+ * @brief 日志器，复制进行日志输出
+ * @details
+ * 一个Logger包含多个LogAppender和一个日志级别，提供log方法
+ * 传入日志事件，判断该日志事件的级别高于日志器本身的级别之后调用LogAppender将日志进行输出，否则该日志被抛弃
  */
 class Logger : public std::enable_shared_from_this<Logger> {
     // enable_shared_from_this是方便在类内部获得一个指向自身的shared_ptr
@@ -590,6 +655,7 @@ private:
 
 /**
  * @brief 日志器管理类
+ * @details 统一管理所有的日志器，自带一个root日志器
  */
 class LoggerManager {
 public:
@@ -631,8 +697,8 @@ private:
 };
 
 // 日志器管理类单例模式
-typedef mds::Singleton<LoggerManager> LoggerMgr;
+typedef sylar::Singleton<LoggerManager> LoggerMgr;
 
-}  // namespace mds
+}  // namespace sylar
 
 #endif

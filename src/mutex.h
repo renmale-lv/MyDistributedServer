@@ -1,11 +1,11 @@
 /*
  * @Author: lvxr
  * @Date: 2024-03-22 19:49:50
- * @LastEditTime: 2024-03-22 20:53:34
+ * @LastEditTime: 2024-03-23 21:17:15
  */
 
-#ifndef MDS_MUTEX_H
-#define MDS_MUTEX_H
+#ifndef SYLAR_MUTEX_H
+#define SYLAR_MUTEX_H
 
 #include <pthread.h>
 #include <semaphore.h>
@@ -19,7 +19,7 @@
 
 #include "noncopyable.h"
 
-namespace mds {
+namespace sylar {
 
 /**
  * @brief 信号量
@@ -30,9 +30,7 @@ public:
      * @brief 构造函数
      * @param[in] count 信号量值的大小
      */
-    Semaphore(uint32_t count = 0){
-        
-    }
+    Semaphore(uint32_t count = 0);
 
     /**
      * @brief 析构函数
@@ -349,6 +347,6 @@ private:
 //     volatile std::atomic_flag m_mutex;
 // };
 
-}  // namespace mds
+}  // namespace sylar
 
 #endif

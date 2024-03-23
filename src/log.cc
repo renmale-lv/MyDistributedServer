@@ -1,7 +1,7 @@
 /*
  * @Author: lvxr
  * @Date: 2024-03-22 18:48:32
- * @LastEditTime: 2024-03-23 15:14:53
+ * @LastEditTime: 2024-03-23 21:23:32
  */
 #include "log.h"
 
@@ -12,7 +12,7 @@
 #include <iostream>
 #include <map>
 
-namespace mds {
+namespace sylar {
 
 const char* LogLevel::ToString(LogLevel::Level level) {
     switch (level) {
@@ -321,7 +321,7 @@ void Logger::setFormatter(LogFormatter::ptr val) {
 
 void Logger::setFormatter(const std::string& val) {
     std::cout << "---" << val << std::endl;
-    mds::LogFormatter::ptr new_val(new mds::LogFormatter(val));
+    sylar::LogFormatter::ptr new_val(new sylar::LogFormatter(val));
     if (new_val->isError()) {
         std::cout << "Logger setFormatter name=" << m_name << " value=" << val
                   << " invalid formatter" << std::endl;
@@ -405,7 +405,7 @@ void Logger::fatal(LogEvent::ptr event) { log(LogLevel::FATAL, event); }
 
 FileLogAppender::FileLogAppender(const std::string& filename)
     : m_filename(filename) {
-    reopen();
+    // reopen();
 }
 
 void FileLogAppender::log(std::shared_ptr<Logger> logger, LogLevel::Level level,
@@ -416,7 +416,7 @@ void FileLogAppender::log(std::shared_ptr<Logger> logger, LogLevel::Level level,
          * @todo: 为什么超过3ms没写要重新打开文件流
          */
         if (now >= (m_lastTime + 3)) {
-            reopen();
+            // reopen();
             m_lastTime = now;
         }
         MutexType::Lock lock(m_mutex);
@@ -856,6 +856,6 @@ Logger::ptr LoggerManager::getLogger(const std::string& name) {
 //     return ss.str();
 // }
 
-// void LoggerManager::init() {}
+void LoggerManager::init() {}
 
-// }  // namespace sylar
+}  // namespace sylar
