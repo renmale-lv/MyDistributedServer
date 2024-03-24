@@ -1,12 +1,9 @@
 /*
  * @Author: lvxr
  * @Date: 2024-03-23 20:48:27
- * @LastEditTime: 2024-03-23 21:24:56
+ * @LastEditTime: 2024-03-24 10:53:08
  */
 
-/*g++ -std=c++11 -pthread ../src/log.h ../src/log.cc ../src/mutex.h
- * ../src/mutex.cc ../src/noncopyable.h ../src/singleton.h test_log.cpp  -o
- * testlog*/
 #include <iostream>
 
 #include "../src/log.h"
