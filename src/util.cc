@@ -6,6 +6,6 @@
 #include "util.h"
 
 namespace sylar {
-pid_t GetThreadId() { return syscall(SYS_gettid); }
+    pid_t GetThreadId() { return syscall(SYS_gettid); }
 
 }  // namespace sylar

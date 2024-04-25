@@ -581,7 +581,6 @@ void LogFormatter::init() {
         vec.push_back(std::make_tuple(nstr, "", 0));
     }
 
-    // 这里不是按顺序添加，init只是判断需要用到哪些格式器
     static std::map<std::string,
                     std::function<FormatItem::ptr(const std::string& str)> >
         s_format_items = {

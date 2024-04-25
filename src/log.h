@@ -203,7 +203,7 @@ public:
      * @param[in] level 日志级别
      * @param[in] file 文件名
      * @param[in] line 文件行号
-     * @param[in] elapse 程序启动依赖的耗时(毫秒)
+     * @param[in] elapse 程序启动到现在的时间(毫秒)
      * @param[in] thread_id 线程id
      * @param[in] fiber_id 协程id
      * @param[in] time 日志事件(秒)
@@ -490,7 +490,7 @@ protected:
 };
 
 /**
- * @brief 日志器，复制进行日志输出
+ * @brief 日志器，负责进行日志输出
  * @details
  * 一个Logger包含多个LogAppender和一个日志级别，提供log方法
  * 传入日志事件，判断该日志事件的级别高于日志器本身的级别之后调用LogAppender将日志进行输出，否则该日志被抛弃
