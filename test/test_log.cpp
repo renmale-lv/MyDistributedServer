@@ -1,7 +1,7 @@
 /*
  * @Author: lvxr
  * @Date: 2024-03-23 20:48:27
- * @LastEditTime: 2024-03-24 10:53:08
+ * @LastEditTime: 2024-05-03 21:56:09
  */
 
 #include <iostream>
@@ -20,17 +20,14 @@ int main() {
 
     logger->addAppender(file_appender);
 
-    // sylar::LogEvent::ptr event(new sylar::LogEvent(__FILE__, __LINE__, 0,
-    // sylar::GetThreadId(), sylar::GetFiberId(), time(0))); event->getSS() <<
-    // "hello sylar log"; logger->log(sylar::LogLevel::DEBUG, event);
     std::cout << "hello sylar log" << std::endl;
 
-    SYLAR_LOG_INFO_TEST(logger) << "test macro";
-    SYLAR_LOG_ERROR_TEST(logger) << "test macro error";
+    SYLAR_LOG_INFO(logger) << "test macro";
+    SYLAR_LOG_ERROR(logger) << "test macro error";
 
-    SYLAR_LOG_FMT_ERROR_TEST(logger, "test macro fmt error %s", "aa");
+    SYLAR_LOG_FMT_ERROR(logger, "test macro fmt error %s", "aa");
 
     auto l = sylar::LoggerMgr::GetInstance()->getLogger("xx");
-    SYLAR_LOG_INFO_TEST(l) << "xxx";
+    SYLAR_LOG_INFO(l) << "xxx";
     return 0;
 }

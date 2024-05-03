@@ -1,7 +1,7 @@
 /*
  * @Author: lvxr
  * @Date: 2024-03-22 18:48:26
- * @LastEditTime: 2024-03-23 21:06:24
+ * @LastEditTime: 2024-05-03 21:56:52
  */
 #ifndef SYLAR_LOG_H
 #define SYLAR_LOG_H
@@ -19,6 +19,8 @@
 
 #include "mutex.h"
 #include "singleton.h"
+#include "util.h"
+#include "thread.h"
 /**
  * 流程：
  * 1.初始化LogFormatter，LogAppender, Logger
@@ -40,49 +42,13 @@
         .getSS()
 
 /**
- * @brief 测试用
- */
-#define SYLAR_LOG_LEVEL_TEST(logger, level)                                    \
-    if (logger->getLevel() <= level)                                           \
-    sylar::LogEventWrap(                                                       \
-        sylar::LogEvent::ptr(new sylar::LogEvent(                              \
-            logger, level, __FILE__, __LINE__, 0, 0, 0, time(0), "log_test"))) \
-        .getSS()
-
-/**
- * @brief 使用流式方式将日志级别debug的日志写入到logger
+ * @brief 使用流式方式将日志写入到logger
  */
 #define SYLAR_LOG_DEBUG(logger) SYLAR_LOG_LEVEL(logger, sylar::LogLevel::DEBUG)
-#define SYLAR_LOG_DEBUG_TEST(logger) \
-    SYLAR_LOG_LEVEL_TEST(logger, sylar::LogLevel::DEBUG)
-
-/**
- * @brief 使用流式方式将日志级别info的日志写入到logger
- */
 #define SYLAR_LOG_INFO(logger) SYLAR_LOG_LEVEL(logger, sylar::LogLevel::INFO)
-#define SYLAR_LOG_INFO_TEST(logger) \
-    SYLAR_LOG_LEVEL_TEST(logger, sylar::LogLevel::INFO)
-
-/**
- * @brief 使用流式方式将日志级别warn的日志写入到logger
- */
 #define SYLAR_LOG_WARN(logger) SYLAR_LOG_LEVEL(logger, sylar::LogLevel::WARN)
-#define SYLAR_LOG_WARN_TEST(logger) \
-    SYLAR_LOG_LEVEL_TEST(logger, sylar::LogLevel::WARN)
-
-/**
- * @brief 使用流式方式将日志级别error的日志写入到logger
- */
 #define SYLAR_LOG_ERROR(logger) SYLAR_LOG_LEVEL(logger, sylar::LogLevel::ERROR)
-#define SYLAR_LOG_ERROR_TEST(logger) \
-    SYLAR_LOG_LEVEL_TEST(logger, sylar::LogLevel::ERROR)
-
-/**
- * @brief 使用流式方式将日志级别fatal的日志写入到logger
- */
 #define SYLAR_LOG_FATAL(logger) SYLAR_LOG_LEVEL(logger, sylar::LogLevel::FATAL)
-#define SYLAR_LOG_FATAL_TEST(logger) \
-    SYLAR_LOG_LEVEL_TEST(logger, sylar::LogLevel::FATAL)
 
 /**
  * @brief 使用格式化方式将日志级别level的日志写入到logger
@@ -97,55 +63,18 @@
         ->format(fmt, __VA_ARGS__)
 
 /**
- * @brief 测试用
- */
-#define SYLAR_LOG_FMT_LEVEL_TEST(logger, level, fmt, ...)                      \
-    if (logger->getLevel() <= level)                                           \
-    sylar::LogEventWrap(                                                       \
-        sylar::LogEvent::ptr(new sylar::LogEvent(                              \
-            logger, level, __FILE__, __LINE__, 0, 0, 0, time(0), "log_test"))) \
-        .getEvent()                                                            \
-        ->format(fmt, __VA_ARGS__)
-
-/**
- * @brief 使用格式化方式将日志级别debug的日志写入到logger
+ * @brief 使用格式化方式将日志写入到logger
  */
 #define SYLAR_LOG_FMT_DEBUG(logger, fmt, ...) \
     SYLAR_LOG_FMT_LEVEL(logger, sylar::LogLevel::DEBUG, fmt, __VA_ARGS__)
-#define SYLAR_LOG_FMT_DEBUG_TEST(logger, fmt, ...) \
-    SYLAR_LOG_FMT_LEVEL_TEST(logger, sylar::LogLevel::DEBUG, fmt, __VA_ARGS__)
-
-/**
- * @brief 使用格式化方式将日志级别info的日志写入到logger
- */
 #define SYLAR_LOG_FMT_INFO(logger, fmt, ...) \
     SYLAR_LOG_FMT_LEVEL(logger, sylar::LogLevel::INFO, fmt, __VA_ARGS__)
-#define SYLAR_LOG_FMT_INFO_TEST(logger, fmt, ...) \
-    SYLAR_LOG_FMT_LEVEL_TEST(logger, sylar::LogLevel::INFO, fmt, __VA_ARGS__)
-
-/**
- * @brief 使用格式化方式将日志级别warn的日志写入到logger
- */
 #define SYLAR_LOG_FMT_WARN(logger, fmt, ...) \
     SYLAR_LOG_FMT_LEVEL(logger, sylar::LogLevel::WARN, fmt, __VA_ARGS__)
-#define SYLAR_LOG_FMT_WARN_TEST(logger, fmt, ...) \
-    SYLAR_LOG_FMT_LEVEL_TEST(logger, sylar::LogLevel::WARN, fmt, __VA_ARGS__)
-
-/**
- * @brief 使用格式化方式将日志级别error的日志写入到logger
- */
 #define SYLAR_LOG_FMT_ERROR(logger, fmt, ...) \
     SYLAR_LOG_FMT_LEVEL(logger, sylar::LogLevel::ERROR, fmt, __VA_ARGS__)
-#define SYLAR_LOG_FMT_ERROR_TEST(logger, fmt, ...) \
-    SYLAR_LOG_FMT_LEVEL_TEST(logger, sylar::LogLevel::ERROR, fmt, __VA_ARGS__)
-
-/**
- * @brief 使用格式化方式将日志级别fatal的日志写入到logger
- */
 #define SYLAR_LOG_FMT_FATAL(logger, fmt, ...) \
     SYLAR_LOG_FMT_LEVEL(logger, sylar::LogLevel::FATAL, fmt, __VA_ARGS__)
-#define SYLAR_LOG_FMT_FATAL_TEST(logger, fmt, ...) \
-    SYLAR_LOG_FMT_LEVEL_TEST(logger, sylar::LogLevel::FATAL, fmt, __VA_ARGS__)
 
 /**
  * @brief 获取主日志器

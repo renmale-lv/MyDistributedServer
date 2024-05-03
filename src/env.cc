@@ -1,7 +1,7 @@
 /*
  * @Author: lvxr
  * @Date: 2024-03-24 11:54:15
- * @LastEditTime: 2024-03-24 16:56:38
+ * @LastEditTime: 2024-05-04 01:20:08
  */
 #include "env.h"
 
@@ -48,8 +48,8 @@ bool Env::init(int argc, char** argv) {
                 }
                 now_key = argv[i] + 1;
             } else {
-                // SYLAR_LOG_ERROR(g_logger)
-                // << "invalid arg idx=" << i << " val=" << argv[i];
+                SYLAR_LOG_ERROR(g_logger)
+                    << "invalid arg idx=" << i << " val=" << argv[i];
                 return false;
             }
         } else {
@@ -57,8 +57,8 @@ bool Env::init(int argc, char** argv) {
                 add(now_key, argv[i]);
                 now_key = nullptr;
             } else {
-                // SYLAR_LOG_ERROR(g_logger)
-                //     << "invalid arg idx=" << i << " val=" << argv[i];
+                SYLAR_LOG_ERROR(g_logger)
+                    << "invalid arg idx=" << i << " val=" << argv[i];
                 return false;
             }
         }

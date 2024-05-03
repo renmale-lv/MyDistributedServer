@@ -1,7 +1,7 @@
 /*
  * @Author: lvxr
  * @Date: 2024-03-23 17:50:22
- * @LastEditTime: 2024-04-07 22:22:46
+ * @LastEditTime: 2024-05-04 01:16:14
  */
 #ifndef SYLAR_CONFIG_H
 #define SYLAR_CONFIG_H
@@ -19,6 +19,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <boost/lexical_cast.hpp>
 
 #include "log.h"
 
@@ -294,9 +295,24 @@ class ConfigVar : public ConfigVarBase {
 public:
     typedef RWMutex RWMutexType;
     typedef std::shared_ptr<ConfigVar> ptr;
-    typedef std::function<void(Const T& old_value, const T& new_value)>
+    typedef std::function<void(const T& old_value, const T& new_value)>
         on_change_cb;
 
+    /**
+     * @brief: 通过参数名,参数值,描述 构造ConfigVar
+     */
+    ConfigVar(const std::string& name, const T& default_value,
+              const std::string& description = "")
+        : ConfigVarBase(name, description), m_val(default_value) {}
+
+    std::string toString() override {
+        try {
+            RWMutexType::ReadLock lock(m_mutex);
+            return ToStr()(m_val);
+        } catch (std::exception& e) {
+            
+        }
+    }
 
 private:
     RWMutexType m_mutex;
