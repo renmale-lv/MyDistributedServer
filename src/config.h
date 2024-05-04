@@ -1,7 +1,7 @@
 /*
  * @Author: lvxr
  * @Date: 2024-03-23 17:50:22
- * @LastEditTime: 2024-05-04 01:16:14
+ * @LastEditTime: 2024-05-04 23:25:56
  */
 #ifndef SYLAR_CONFIG_H
 #define SYLAR_CONFIG_H
@@ -9,6 +9,7 @@
 #include <yaml-cpp/yaml.h>
 
 #include <algorithm>
+#include <boost/lexical_cast.hpp>
 #include <functional>
 #include <list>
 #include <map>
@@ -19,7 +20,6 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-#include <boost/lexical_cast.hpp>
 
 #include "log.h"
 
@@ -70,7 +70,7 @@ public:
     /**
      * @brief 返回配置参数值的类型名称
      */
-    virtual std::string getTypeName() const = 0;
+    // virtual std::string getTypeName() const = 0;
 
 protected:
     // 配置参数的名称
@@ -305,19 +305,156 @@ public:
               const std::string& description = "")
         : ConfigVarBase(name, description), m_val(default_value) {}
 
+    /**
+     * @brief: 将参数值转换成string
+     * @exception 转换失败抛出异常
+     */
     std::string toString() override {
         try {
             RWMutexType::ReadLock lock(m_mutex);
             return ToStr()(m_val);
         } catch (std::exception& e) {
-            
         }
+        return "";
+    }
+
+    /**
+     * @brief 从string转成参数的值
+     * @exception 当转换失败抛出异常
+     */
+    bool fromString(const std::string& val) override {
+        try {
+            setValue(FromStr()(val));
+        } catch (std::exception& e) {
+        }
+        return false;
+    }
+
+    /**
+     * @brief: 获取当前参数的值
+     */
+    const T getValue() {
+        // 上读锁
+        RWMutexType::ReadLock lock(m_mutex);
+        return m_val;
+    }
+
+    /**
+     * @brief: 设置当前参数的值
+     * @details 如果参数的值有发生变化,则通知所有注册回调函数
+     */
+    void setValue(const T& v) {
+        {
+            // 上读锁
+            RWMutexType::ReadLock lock(m_mutex);
+            if (v == m_val) {
+                // 如果新值和旧值相同，则不做任何操作
+                return;
+            }
+            // 不同执行回调函数
+            for (auto& it : m_cbs) {
+                it.second(m_val, v);
+            }
+        }
+        // 不相同写值，先上写锁
+        RWMutexType::WriteLock lock(m_mutex);
+        m_val = v;
     }
 
 private:
+    // 读写锁
     RWMutexType m_mutex;
+    // 参数值
     T m_val;
+    // 回调函数集合
     std::map<uint64_t, on_change_cb> m_cbs;
+};
+
+class Config {
+public:
+    typedef std::unordered_map<std::string, ConfigVarBase::ptr> ConfigVarMap;
+    typedef RWMutex RWMutexType;
+
+    /**
+     * @brief 获取/创建对应参数名的配置参数
+     * @param[in] name 配置参数名称
+     * @param[in] default_value 参数默认值
+     * @param[in] description 参数描述
+     * @details 获取参数名为name的配置参数,如果存在直接返回
+     *          如果不存在,创建参数配置并用default_value赋值
+     * @return 返回对应的配置参数,如果参数名存在但是类型不匹配则返回nullptr
+     * @exception 如果参数名包含非法字符[^0-9a-z_.]抛出异常std::invalid_argument
+     */
+    template <class T>
+    static typename ConfigVar<T>::ptr Lookup(
+        const std::string& name, const T& default_value,
+        const std::string& decription = "") {
+        // 上写锁
+        RWMutexType::WriteLock lock(GetMutex());
+        // 查找参数名称为name的参数
+        auto it = GetDatas().find(name);
+        // 如果存在该变量
+        if (it != GetDatas().end()) {
+            // 为了解决智能指针的类型转换问题，增加了std::dynamic_pointer_cast方法，该方法只适用于std::shared_ptr
+            auto tmp = std::dynamic_pointer_cast<ConfigVar<T>>(it->second);
+            if (tmp) {
+                // 可以转换，格式正确
+                SYLAR_LOG_INFO(SYLAR_LOG_ROOT())
+                    << "Lookup name=" << name << " exists";
+                return tmp;
+            } else {
+                // 格式不正确
+                /*** @todo::打印日志*/
+                return nullptr;
+            }
+        }
+
+        // 不存在该变量
+        // 判断变量名字是否合法
+        if (name.find_first_not_of("abcdefghikjlmnopqrstuvwxyz._012345678") !=
+            std::string::npos) {
+            SYLAR_LOG_ERROR(SYLAR_LOG_ROOT()) << "Lookup name invalid " << name;
+            throw std::invalid_argument(name);
+        }
+
+        // 创建变量
+        typename ConfigVar<T>::ptr v(
+            new ConfigVar<T>(name, default_value, decription));
+        GetDatas()[name] = v;
+        return v;
+    }
+
+    /**
+     * @brief 查找配置参数
+     * @param[in] name 配置参数名称
+     * @return 返回配置参数名为name的配置参数
+     */
+    template <class T>
+    static typename ConfigVar<T>::ptr Lookup(const std::string& name) {
+        RWMutexType::ReadLock lock(GetMutex());
+        auto it = GetDatas().find(name);
+        if (it == GetDatas().end()) return nullptr;
+        return std::dynamic_pointer_cast<ConfigVar<T>>(it->second);
+    }
+
+private:
+    /**
+     * @brief 返回所有的配置项
+     */
+    static ConfigVarMap& GetDatas() {
+        static ConfigVarMap s_datas;
+        return s_datas;
+    }
+
+    /**
+     * @brief 配置项的RWMutex
+     */
+    static RWMutexType& GetMutex() {
+        static RWMutexType s_mutex;
+        return s_mutex;
+    }
+
+    // 这里使用静态变量有点类似单例中的懒汉模式
 };
 
 }  // namespace sylar

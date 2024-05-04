@@ -60,6 +60,7 @@
         "cinttypes": "cpp",
         "set": "cpp",
         "unordered_set": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "source_location": "cpp"
     }
 }
