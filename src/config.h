@@ -1,7 +1,7 @@
 /*
  * @Author: lvxr
  * @Date: 2024-03-23 17:50:22
- * @LastEditTime: 2024-05-04 23:25:56
+ * @LastEditTime: 2024-05-08 16:07:33
  */
 #ifndef SYLAR_CONFIG_H
 #define SYLAR_CONFIG_H
@@ -102,6 +102,7 @@ template <class T>
 class LexicalCast<std::string, std::vector<T>> {
 public:
     std::vector<T> operator()(const std::string& v) {
+        SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << v;
         YAML::Node node = YAML::Load(v);
         typename std::vector<T> vec;
         std::stringstream ss;
@@ -436,6 +437,17 @@ public:
         if (it == GetDatas().end()) return nullptr;
         return std::dynamic_pointer_cast<ConfigVar<T>>(it->second);
     }
+
+    /**
+     * @brief 使用YAML::Node初始化配置模块
+     */
+    static void LoadFromYaml(const YAML::Node& root);
+
+    /**
+     * @brief 查找配置参数,返回配置参数的基类
+     * @param[in] name 配置参数名称
+     */
+    static ConfigVarBase::ptr LookupBase(const std::string& name);
 
 private:
     /**
