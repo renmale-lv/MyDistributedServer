@@ -1,7 +1,7 @@
 /*
  * @Author: lvxr
  * @Date: 2024-03-23 17:50:22
- * @LastEditTime: 2024-05-08 16:07:33
+ * @LastEditTime: 2024-05-09 19:58:56
  */
 #ifndef SYLAR_CONFIG_H
 #define SYLAR_CONFIG_H
@@ -70,7 +70,7 @@ public:
     /**
      * @brief 返回配置参数值的类型名称
      */
-    // virtual std::string getTypeName() const = 0;
+    virtual std::string getTypeName() const = 0;
 
 protected:
     // 配置参数的名称
@@ -102,7 +102,6 @@ template <class T>
 class LexicalCast<std::string, std::vector<T>> {
 public:
     std::vector<T> operator()(const std::string& v) {
-        SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << v;
         YAML::Node node = YAML::Load(v);
         typename std::vector<T> vec;
         std::stringstream ss;
@@ -315,6 +314,11 @@ public:
             RWMutexType::ReadLock lock(m_mutex);
             return ToStr()(m_val);
         } catch (std::exception& e) {
+            // 输出错误信息
+            SYLAR_LOG_ERROR(SYLAR_LOG_ROOT())
+                << "ConfigVar::toString exception " << e.what()
+                << " convert: " << TypeToName<T>()
+                << " to string name=" << m_name;
         }
         return "";
     }
@@ -327,6 +331,10 @@ public:
         try {
             setValue(FromStr()(val));
         } catch (std::exception& e) {
+            SYLAR_LOG_ERROR(SYLAR_LOG_ROOT())
+                << "ConfigVar::fromString exception " << e.what()
+                << " convert: string to " << TypeToName<T>()
+                << " name=" << m_name << " - " << val;
         }
         return false;
     }
@@ -361,6 +369,11 @@ public:
         RWMutexType::WriteLock lock(m_mutex);
         m_val = v;
     }
+
+    /**
+     * @brief: 返回函数类型，虚函数继承自父类
+     */
+    std::string getTypeName() const override { return TypeToName<T>(); }
 
 private:
     // 读写锁
@@ -405,7 +418,11 @@ public:
                 return tmp;
             } else {
                 // 格式不正确
-                /*** @todo::打印日志*/
+                SYLAR_LOG_ERROR(SYLAR_LOG_ROOT())
+                    << "Lookup name=" << name << " exist but type not "
+                    << TypeToName<T>()
+                    << " real_type=" << it->second->getTypeName()
+                    << " and value is " << it->second->toString();
                 return nullptr;
             }
         }

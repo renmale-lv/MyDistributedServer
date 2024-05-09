@@ -1,6 +1,6 @@
 /*
  * @Author: lvxr
- * @LastEditTime: 2024-05-08 23:14:58
+ * @LastEditTime: 2024-05-09 20:04:41
  */
 #include <yaml-cpp/yaml.h>
 
@@ -9,8 +9,12 @@
 #include "../src/config.h"
 #include "../src/log.h"
 
+#if 0
 sylar::ConfigVar<int>::ptr int_value =
     sylar::Config::Lookup("test.int", (int)8080, "system int");
+
+// sylar::ConfigVar<float>::ptr test_type =
+//     sylar::Config::Lookup("test.int", (float)9090, "test type");
 
 sylar::ConfigVar<float>::ptr float_value =
     sylar::Config::Lookup("test.float", (float)10.2f, "system float");
@@ -67,9 +71,8 @@ void print_yaml(const YAML::Node& node, int level) {
 void test_yaml() {
     YAML::Node root = YAML::LoadFile(
         "/home/nanasaki/project/MyDistributedServer/test/test.yaml");
-    // SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << root;
-    // print_yaml(root, 0);
-    sylar::Config::LoadFromYaml(root);
+    SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << root;
+    print_yaml(root, 0);
 }
 
 void test_config() {
@@ -77,28 +80,28 @@ void test_config() {
     SYLAR_LOG_INFO(SYLAR_LOG_ROOT())
         << "befort float: " << float_value->toString();
 
-#define XX(var, name, prefix)                                                 \
-    {                                                                         \
-        auto& v = var->getValue();                                            \
-        for (auto& it : v) {                                                  \
-            SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << #prefix " " #name ": " << it; \
-        }                                                                     \
-        SYLAR_LOG_INFO(SYLAR_LOG_ROOT())                                      \
-            << #prefix " " #name " yaml: " << var->toString();                \
-    }
+#    define XX(var, name, prefix)                                  \
+        {                                                          \
+            auto& v = var->getValue();                             \
+            for (auto& it : v) {                                   \
+                SYLAR_LOG_INFO(SYLAR_LOG_ROOT())                   \
+                    << #prefix " " #name ": " << it;               \
+            }                                                      \
+            SYLAR_LOG_INFO(SYLAR_LOG_ROOT())                       \
+                << #prefix " " #name " yaml: " << var->toString(); \
+        }
 
-#define XX_M(g_var, name, prefix)                                          \
-    {                                                                      \
-        auto& v = g_var->getValue();                                       \
-        for (auto& i : v) {                                                \
-            SYLAR_LOG_INFO(SYLAR_LOG_ROOT())                               \
-                << #prefix " " #name ": {" << i.first << " - " << i.second \
-                << "}";                                                    \
-        }                                                                  \
-        SYLAR_LOG_INFO(SYLAR_LOG_ROOT())                                   \
-            << #prefix " " #name " yaml: " << g_var->toString();           \
-    }
-
+#    define XX_M(g_var, name, prefix)                                          \
+        {                                                                      \
+            auto& v = g_var->getValue();                                       \
+            for (auto& i : v) {                                                \
+                SYLAR_LOG_INFO(SYLAR_LOG_ROOT())                               \
+                    << #prefix " " #name ": {" << i.first << " - " << i.second \
+                    << "}";                                                    \
+            }                                                                  \
+            SYLAR_LOG_INFO(SYLAR_LOG_ROOT())                                   \
+                << #prefix " " #name " yaml: " << g_var->toString();           \
+        }
     XX(vector_value, vector, before);
     XX(list_value, list, before);
     XX(set_value, set, before);
@@ -121,7 +124,107 @@ void test_config() {
     XX_M(umap_value, umap, after);
 }
 
+#endif
+
+class Person {
+public:
+    Person() {}
+    std::string m_name;
+    int m_age = 0;
+    bool m_sex = 0;
+
+    std::string toString() const {
+        std::stringstream ss;
+        ss << "[Person name=" << m_name << " age=" << m_age << " sex=" << m_sex
+           << "]";
+        return ss.str();
+    }
+
+    bool operator==(const Person& oth) const {
+        return m_name == oth.m_name && m_age == oth.m_age && m_sex == oth.m_sex;
+    }
+};
+
+namespace sylar {
+
+template <>
+class LexicalCast<std::string, Person> {
+public:
+    Person operator()(const std::string& v) {
+        YAML::Node node = YAML::Load(v);
+        Person p;
+        p.m_name = node["name"].as<std::string>();
+        p.m_age = node["age"].as<int>();
+        p.m_sex = node["sex"].as<bool>();
+        return p;
+    }
+};
+
+template <>
+class LexicalCast<Person, std::string> {
+public:
+    std::string operator()(const Person& p) {
+        YAML::Node node;
+        node["name"] = p.m_name;
+        node["age"] = p.m_age;
+        node["sex"] = p.m_sex;
+        std::stringstream ss;
+        ss << node;
+        return ss.str();
+    }
+};
+}  // namespace sylar
+
+sylar::ConfigVar<Person>::ptr person =
+    sylar::Config::Lookup("class.person", Person(), "class person");
+
+sylar::ConfigVar<std::map<std::string, Person>>::ptr person_map =
+    sylar::Config::Lookup("class.personmap",
+                          std::map<std::string, Person>{{"a", Person()}},
+                          "map person");
+
+sylar::ConfigVar<std::vector<Person>>::ptr person_vec = sylar::Config::Lookup(
+    "class.personvec", std::vector<Person>{Person()}, "vector person");
+
+void test_class() {
+#define XX_PM(var, prefix)                                                    \
+    {                                                                         \
+        auto m = var->getValue();                                             \
+        for (auto& i : m) {                                                   \
+            SYLAR_LOG_INFO(SYLAR_LOG_ROOT())                                  \
+                << prefix << ": " << i.first << " - " << i.second.toString(); \
+        }                                                                     \
+        SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << prefix << ": size=" << m.size();  \
+    }
+
+#define XX_PV(var, prefix)                                                   \
+    {                                                                        \
+        auto m = var->getValue();                                            \
+        for (auto& i : m) {                                                  \
+            SYLAR_LOG_INFO(SYLAR_LOG_ROOT())                                 \
+                << prefix << ": " << i.toString();                           \
+        }                                                                    \
+        SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << prefix << ": size=" << m.size(); \
+    }
+
+    SYLAR_LOG_INFO(SYLAR_LOG_ROOT())
+        << "before: " << person->getValue().toString() << " - "
+        << person->toString();
+    XX_PM(person_map, "map before");
+    XX_PV(person_vec, "vec before");
+    YAML::Node root = YAML::LoadFile(
+        "/home/nanasaki/project/MyDistributedServer/test/test.yaml");
+    sylar::Config::LoadFromYaml(root);
+    SYLAR_LOG_INFO(SYLAR_LOG_ROOT())
+        << "after: " << person->getValue().toString() << " - "
+        << person->toString();
+    XX_PM(person_map, "map after");
+    XX_PV(person_vec, "vec after");
+}
+
 int main() {
-    test_config();
+    // test_yaml();
+    // test_config();
+    test_class();
     return 0;
 }

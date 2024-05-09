@@ -1,14 +1,39 @@
 test:
-    int: 9090
-    float: 13.4
-    vector: [55,66]
-    list: [26,37]
-    set: [20,30,40,20]
-    uset: [20,30,40,20]
-    map:
-      a: 33
-      b: 44
-    umap:
-      c: 55
-      b: 44
-      a: 33
+  int: 9090
+  float: 13.4
+  vector: [55,66]
+  list: [26,37]
+  set: [20,30,40,20]
+  uset: [20,30,40,20]
+  map:
+    a: 33
+    b: 44
+  umap:
+    c: 55
+    b: 44
+    a: 33
+
+class:
+  person:
+    name: nanasaki
+    age: 22
+    sex: true
+  personmap:
+    x: 
+      name: x
+      age: 10
+      sex: true
+    xx:
+      name: xx
+      age: 20
+      sex: false
+  personvec:
+    - name: x
+      age: 10
+      sex: true
+    - name: xx
+      age: 20
+      sex: false
+    - name: xxx
+      age: 30
+      sex: true
