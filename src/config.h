@@ -1,7 +1,7 @@
 /*
  * @Author: lvxr
  * @Date: 2024-03-23 17:50:22
- * @LastEditTime: 2024-05-09 19:58:56
+ * @LastEditTime: 2024-05-10 15:38:19
  */
 #ifndef SYLAR_CONFIG_H
 #define SYLAR_CONFIG_H
@@ -374,6 +374,47 @@ public:
      * @brief: 返回函数类型，虚函数继承自父类
      */
     std::string getTypeName() const override { return TypeToName<T>(); }
+
+    /**
+     * @brief: 添加变换回调函数
+     * @return: 返回该回调函数对应的唯一id,用于删除回调
+     */
+    uint64_t addListener(on_change_cb cb) {
+        // 用于生成唯一id
+        static uint64_t s_fun_id = 0;
+        RWMutexType::WriteLock lock(m_mutex);
+        ++s_fun_id;
+        m_cbs[s_fun_id] = cb;
+        return s_fun_id;
+    }
+
+    /**
+     * @brief 删除回调函数
+     * @param[in] id 回调函数的唯一id
+     */
+    void delListener(uint64_t id) {
+        RWMutexType::WriteLock lock(m_mutex);
+        m_cbs.erase(cb_id);
+    }
+
+    /**
+     * @brief 获取回调函数
+     * @param[in] id 回调函数的唯一id
+     * @return 如果存在返回对应的回调函数,否则返回nullptr
+     */
+    on_change_cb getListener(uint64_t id) {
+        RWMutexType::ReadLock(m_mutex);
+        auto it = m_cbs.find(id);
+        return it == m_cbs.end() ? nullptr : it->second;
+    }
+
+    /**
+     * @brief 清理所有的回调函数
+     */
+    void clearListener() {
+        RWMutexType::WriteLock lock(m_mutex);
+        m_cbs.clear();
+    }
 
 private:
     // 读写锁

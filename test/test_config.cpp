@@ -1,6 +1,6 @@
 /*
  * @Author: lvxr
- * @LastEditTime: 2024-05-09 20:04:41
+ * @LastEditTime: 2024-05-10 15:36:52
  */
 #include <yaml-cpp/yaml.h>
 
@@ -9,7 +9,6 @@
 #include "../src/config.h"
 #include "../src/log.h"
 
-#if 0
 sylar::ConfigVar<int>::ptr int_value =
     sylar::Config::Lookup("test.int", (int)8080, "system int");
 
@@ -80,28 +79,27 @@ void test_config() {
     SYLAR_LOG_INFO(SYLAR_LOG_ROOT())
         << "befort float: " << float_value->toString();
 
-#    define XX(var, name, prefix)                                  \
-        {                                                          \
-            auto& v = var->getValue();                             \
-            for (auto& it : v) {                                   \
-                SYLAR_LOG_INFO(SYLAR_LOG_ROOT())                   \
-                    << #prefix " " #name ": " << it;               \
-            }                                                      \
-            SYLAR_LOG_INFO(SYLAR_LOG_ROOT())                       \
-                << #prefix " " #name " yaml: " << var->toString(); \
-        }
+#define XX(var, name, prefix)                                                 \
+    {                                                                         \
+        auto& v = var->getValue();                                            \
+        for (auto& it : v) {                                                  \
+            SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << #prefix " " #name ": " << it; \
+        }                                                                     \
+        SYLAR_LOG_INFO(SYLAR_LOG_ROOT())                                      \
+            << #prefix " " #name " yaml: " << var->toString();                \
+    }
 
-#    define XX_M(g_var, name, prefix)                                          \
-        {                                                                      \
-            auto& v = g_var->getValue();                                       \
-            for (auto& i : v) {                                                \
-                SYLAR_LOG_INFO(SYLAR_LOG_ROOT())                               \
-                    << #prefix " " #name ": {" << i.first << " - " << i.second \
-                    << "}";                                                    \
-            }                                                                  \
-            SYLAR_LOG_INFO(SYLAR_LOG_ROOT())                                   \
-                << #prefix " " #name " yaml: " << g_var->toString();           \
-        }
+#define XX_M(g_var, name, prefix)                                          \
+    {                                                                      \
+        auto& v = g_var->getValue();                                       \
+        for (auto& i : v) {                                                \
+            SYLAR_LOG_INFO(SYLAR_LOG_ROOT())                               \
+                << #prefix " " #name ": {" << i.first << " - " << i.second \
+                << "}";                                                    \
+        }                                                                  \
+        SYLAR_LOG_INFO(SYLAR_LOG_ROOT())                                   \
+            << #prefix " " #name " yaml: " << g_var->toString();           \
+    }
     XX(vector_value, vector, before);
     XX(list_value, list, before);
     XX(set_value, set, before);
@@ -123,8 +121,6 @@ void test_config() {
     XX_M(map_value, map, after);
     XX_M(umap_value, umap, after);
 }
-
-#endif
 
 class Person {
 public:
@@ -222,9 +218,21 @@ void test_class() {
     XX_PV(person_vec, "vec after");
 }
 
+void test_listener() {
+    person->addListener([](const Person& old_value, const Person& new_value) {
+        SYLAR_LOG_INFO(SYLAR_LOG_ROOT())
+            << "old_value=" << old_value.toString()
+            << " new_value=" << new_value.toString();
+    });
+    YAML::Node root = YAML::LoadFile(
+        "/home/nanasaki/project/MyDistributedServer/test/test.yaml");
+    sylar::Config::LoadFromYaml(root);
+}
+
 int main() {
     // test_yaml();
     // test_config();
-    test_class();
+    // test_class();
+    test_listener();
     return 0;
 }
