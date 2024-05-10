@@ -1,7 +1,7 @@
 /*
  * @Author: lvxr
  * @Date: 2024-03-24 11:54:15
- * @LastEditTime: 2024-05-04 01:20:08
+ * @LastEditTime: 2024-05-10 20:43:36
  */
 #include "env.h"
 
@@ -130,29 +130,29 @@ std::string Env::getEnv(const std::string& key,
     return v;
 }
 
-// std::string Env::getAbsolutePath(const std::string& path) const {
-//     if (path.empty()) {
-//         return "/";
-//     }
-//     if (path[0] == '/') {
-//         return path;
-//     }
-//     return m_cwd + path;
-// }
+std::string Env::getAbsolutePath(const std::string& path) const {
+    if (path.empty()) {
+        return "/";
+    }
+    if (path[0] == '/') {
+        return path;
+    }
+    return m_cwd + path;
+}
 
-// std::string Env::getAbsoluteWorkPath(const std::string& path) const {
-//     if (path.empty()) {
-//         return "/";
-//     }
-//     if (path[0] == '/') {
-//         return path;
-//     }
-//     static sylar::ConfigVar<std::string>::ptr g_server_work_path =
-//         sylar::Config::Lookup<std::string>("server.work_path");
-//     return g_server_work_path->getValue() + "/" + path;
-// }
+std::string Env::getAbsoluteWorkPath(const std::string& path) const {
+    if (path.empty()) {
+        return "/";
+    }
+    if (path[0] == '/') {
+        return path;
+    }
+    static sylar::ConfigVar<std::string>::ptr g_server_work_path =
+        sylar::Config::Lookup<std::string>("server.work_path");
+    return g_server_work_path->getValue() + "/" + path;
+}
 
-// std::string Env::getConfigPath() { return getAbsolutePath(get("c", "conf"));
-// }
+std::string Env::getConfigPath() { return getAbsolutePath(get("c", "conf"));
+}
 
 }  // namespace sylar

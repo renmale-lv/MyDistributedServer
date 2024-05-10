@@ -1,7 +1,7 @@
 /*
  * @Author: lvxr
  * @Date: 2024-03-23 17:50:22
- * @LastEditTime: 2024-05-10 15:38:19
+ * @LastEditTime: 2024-05-10 16:51:38
  */
 #ifndef SYLAR_CONFIG_H
 #define SYLAR_CONFIG_H
@@ -394,7 +394,7 @@ public:
      */
     void delListener(uint64_t id) {
         RWMutexType::WriteLock lock(m_mutex);
-        m_cbs.erase(cb_id);
+        m_cbs.erase(id);
     }
 
     /**
@@ -403,7 +403,7 @@ public:
      * @return 如果存在返回对应的回调函数,否则返回nullptr
      */
     on_change_cb getListener(uint64_t id) {
-        RWMutexType::ReadLock(m_mutex);
+        RWMutexType::ReadLock lock(m_mutex);
         auto it = m_cbs.find(id);
         return it == m_cbs.end() ? nullptr : it->second;
     }

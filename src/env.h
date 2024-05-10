@@ -1,7 +1,7 @@
 /*
  * @Author: lvxr
  * @Date: 2024-03-24 11:54:10
- * @LastEditTime: 2024-03-24 16:35:15
+ * @LastEditTime: 2024-05-10 20:43:46
  * @brief 环境变量
  */
 #ifndef SYLAR_ENV_H
@@ -85,9 +85,9 @@ public:
     std::string getEnv(const std::string& key,
                        const std::string& default_value = "");
 
-    // std::string getAbsolutePath(const std::string& path) const;
-    // std::string getAbsoluteWorkPath(const std::string& path) const;
-    // std::string getConfigPath();
+    std::string getAbsolutePath(const std::string& path) const;
+    std::string getAbsoluteWorkPath(const std::string& path) const;
+    std::string getConfigPath();
 
 private:
     // 读写锁

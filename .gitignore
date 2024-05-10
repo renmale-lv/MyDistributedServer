@@ -1,5 +1,6 @@
 # cmake output
 build
 lib
-bin
+bin/test
+logs
 

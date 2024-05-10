@@ -1,7 +1,7 @@
 /*
  * @Author: lvxr
  * @Date: 2024-03-22 18:48:26
- * @LastEditTime: 2024-05-03 21:56:52
+ * @LastEditTime: 2024-05-10 20:48:13
  */
 #ifndef SYLAR_LOG_H
 #define SYLAR_LOG_H
@@ -382,10 +382,10 @@ public:
     virtual void log(std::shared_ptr<Logger> logger, LogLevel::Level level,
                      LogEvent::ptr event) = 0;
 
-    // /**
-    //  * @brief 将日志输出目标的配置转成YAML String
-    //  */
-    // virtual std::string toYamlString() = 0;
+    /**
+     * @brief 将日志输出目标的配置转成YAML String
+     */
+    virtual std::string toYamlString() = 0;
 
     /**
      * @brief 更改日志格式器
@@ -553,7 +553,7 @@ public:
     typedef std::shared_ptr<StdoutLogAppender> ptr;
     void log(Logger::ptr logger, LogLevel::Level level,
              LogEvent::ptr event) override;
-    // std::string toYamlString() override;
+    std::string toYamlString() override;
 };
 
 /**
@@ -565,7 +565,7 @@ public:
     FileLogAppender(const std::string& filename);
     void log(Logger::ptr logger, LogLevel::Level level,
              LogEvent::ptr event) override;
-    // std::string toYamlString() override;
+    std::string toYamlString() override;
 
     /**
      * @brief 重新打开日志文件

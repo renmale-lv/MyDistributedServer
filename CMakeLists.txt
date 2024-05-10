@@ -45,6 +45,7 @@ option(BUILD_TEST "ON for compile test" ON)
 set(LIBS sylar pthread yaml-cpp)
 
 if(BUILD_TEST)
+    set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin/test)
     sylar_add_executable(test_log "test/test_log.cpp" sylar "${LIBS}") 
     sylar_add_executable(test_env "test/test_env.cpp" sylar "${LIBS}")
     sylar_add_executable(test_config "test/test_config.cpp" sylar "${LIBS}")
