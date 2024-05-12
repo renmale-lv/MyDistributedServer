@@ -1,7 +1,7 @@
 /*
  * @Author: lvxr
  * @Date: 2024-03-22 18:48:32
- * @LastEditTime: 2024-05-10 22:03:18
+ * @LastEditTime: 2024-05-11 19:23:24
  */
 #include "log.h"
 
@@ -323,7 +323,6 @@ void Logger::setFormatter(LogFormatter::ptr val) {
 }
 
 void Logger::setFormatter(const std::string& val) {
-    std::cout << "---" << val << std::endl;
     sylar::LogFormatter::ptr new_val(new sylar::LogFormatter(val));
     if (new_val->isError()) {
         std::cout << "Logger setFormatter name=" << m_name << " value=" << val

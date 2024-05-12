@@ -1,7 +1,7 @@
 /*
  * @Author: lvxr
  * @Date: 2024-03-22 19:49:50
- * @LastEditTime: 2024-03-23 21:17:15
+ * @LastEditTime: 2024-05-12 23:59:20
  */
 
 #ifndef SYLAR_MUTEX_H
@@ -299,53 +299,6 @@ private:
     // 自旋锁
     pthread_spinlock_t m_mutex;
 };
-
-// /**
-//  * @brief 原子锁
-//  */
-// class CASLock : Noncopyable {
-// public:
-//     // 局部锁
-//     typedef ScopedLockImpl<CASLock> Lock;
-
-//     /**
-//      * @brief 构造函数
-//      */
-//     CASLock() { m_mutex.clear(); }
-
-//     /**
-//      * @brief 析构函数
-//      */
-//     ~CASLock() {}
-
-//     /**
-//      * @brief 上锁
-//      */
-//     void lock() {
-//         while (std::atomic_flag_test_and_set_explicit(
-//             &m_mutex, std::memory_order_acquire)) {
-//         }
-//     }
-
-//     /**
-//      * @brief 解锁
-//      */
-//     void unlock() {
-//         /**
-//          * std::atomic_flag_clear_explicit用于以指定的内存顺序清除原子标志的值
-//          * memory_order_relaxed：最轻量级的内存顺序。对原子操作没有额外的同步要求，可以乱序执行，也不会引入任何额外的内存同步开销。只保证原子操作的原子性
-//          * memory_order_acquire：在原子操作前保证所有后续的读操作都不会被重排到原子操作前执行。这个内存顺序用于获取操作，保证原子操作之前的读取对后续的操作可见
-//          * memory_order_release：在原子操作后保证所有先前的写操作都不会被重排到原子操作后执行。这个内存顺序用于释放操作，确保原子操作之后的写入对其他线程可见
-//          * memory_order_acq_rel：同时包含了memory_order_acquire和memory_order_release的内存顺序，用于兼顾获取和释放操作
-//          * memory_order_seq_cst：最严格的内存顺序，所有原子操作都按顺序执行，并且对其他线程可见性进行全局同步。这是最常用的内存顺序，也是默认的内存顺序选项
-//          */
-//         std::atomic_flag_clear_explicit(&m_mutex, std::memory_order_release);
-//     }
-
-// private:
-//     // 原子状态
-//     volatile std::atomic_flag m_mutex;
-// };
 
 }  // namespace sylar
 

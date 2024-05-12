@@ -1,6 +1,6 @@
 /*
  * @Author: lvxr
- * @LastEditTime: 2024-05-10 15:36:52
+ * @LastEditTime: 2024-05-11 19:35:27
  */
 #include <yaml-cpp/yaml.h>
 
@@ -8,6 +8,7 @@
 
 #include "../src/config.h"
 #include "../src/log.h"
+#include "../src/thread.h"
 
 sylar::ConfigVar<int>::ptr int_value =
     sylar::Config::Lookup("test.int", (int)8080, "system int");
@@ -229,10 +230,28 @@ void test_listener() {
     sylar::Config::LoadFromYaml(root);
 }
 
+void test_log() {
+    sylar::Logger::ptr system_log = SYLAR_LOG_NAME("system");
+    SYLAR_LOG_INFO(system_log) << "hello system" << std::endl;
+    std::cout << sylar::LoggerMgr::GetInstance()->toYamlString() << std::endl;
+    YAML::Node root = YAML::LoadFile(
+        "/home/nanasaki/project/MyDistributedServer/bin/conf/log.yaml");
+    sylar::Config::LoadFromYaml(root);
+    std::cout << "=============" << std::endl;
+    std::cout << sylar::LoggerMgr::GetInstance()->toYamlString() << std::endl;
+    std::cout << "=============" << std::endl;
+    // std::cout << root << std::endl;
+    SYLAR_LOG_INFO(system_log) << "hello system" << std::endl;
+
+    system_log->setFormatter("%d - %m%n");
+    SYLAR_LOG_INFO(system_log) << "hello system" << std::endl;
+}
+
 int main() {
     // test_yaml();
     // test_config();
     // test_class();
-    test_listener();
+    // test_listener();
+    test_log();
     return 0;
 }

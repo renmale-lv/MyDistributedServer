@@ -1,7 +1,7 @@
 /*
  * @Author: lvxr
  * @Date: 2024-03-24 11:54:15
- * @LastEditTime: 2024-05-10 20:43:36
+ * @LastEditTime: 2024-05-11 15:25:37
  */
 #include "env.h"
 
@@ -152,7 +152,6 @@ std::string Env::getAbsoluteWorkPath(const std::string& path) const {
     return g_server_work_path->getValue() + "/" + path;
 }
 
-std::string Env::getConfigPath() { return getAbsolutePath(get("c", "conf"));
-}
+std::string Env::getConfigPath() { return getAbsolutePath(get("c", "conf")); }
 
 }  // namespace sylar

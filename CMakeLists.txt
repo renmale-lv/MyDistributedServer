@@ -26,6 +26,7 @@ if(Boost_FOUND)
 endif()
 
 set(LIB_SRC
+    src/thread.cc
     src/config.cc
     src/env.cc
     src/log.cc
@@ -49,4 +50,5 @@ if(BUILD_TEST)
     sylar_add_executable(test_log "test/test_log.cpp" sylar "${LIBS}") 
     sylar_add_executable(test_env "test/test_env.cpp" sylar "${LIBS}")
     sylar_add_executable(test_config "test/test_config.cpp" sylar "${LIBS}")
+    sylar_add_executable(test_thread "test/test_thread.cpp" sylar "${LIBS}")
 endif()
