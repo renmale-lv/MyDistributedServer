@@ -32,6 +32,7 @@ set(LIB_SRC
     src/log.cc
     src/mutex.cc
     src/util.cc
+    src/fiber.cc
 )
 
 add_library(sylar SHARED ${LIB_SRC})
@@ -51,4 +52,6 @@ if(BUILD_TEST)
     sylar_add_executable(test_env "test/test_env.cpp" sylar "${LIBS}")
     sylar_add_executable(test_config "test/test_config.cpp" sylar "${LIBS}")
     sylar_add_executable(test_thread "test/test_thread.cpp" sylar "${LIBS}")
+    sylar_add_executable(test_util "test/test_util.cpp" sylar "${LIBS}")
+    sylar_add_executable(test_fiber "test/test_fiber.cpp" sylar "${LIBS}")
 endif()
